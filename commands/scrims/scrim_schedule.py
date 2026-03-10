@@ -107,7 +107,7 @@ class ScrimSchedule(commands.Cog):
                 maps.append(map5.value)
 
         map_display = "\n".join(
-            f"> **Map {i+1}:** {m}" for i, m in enumerate(maps)
+            f"     **Map {i+1}:** {m}" for i, m in enumerate(maps)
         )
 
         await interaction.response.send_message(
@@ -118,10 +118,10 @@ class ScrimSchedule(commands.Cog):
         schedule_message = (
             f"# 🗓 **{scrim_type.value} SCHEDULE**\n\n"
             f"> **Teams:** {team_a.mention} vs {team_b.mention}\n"
-            f"> **Format:** {format.value}\n"
             f"> **Time:** {time_display}\n"
-            f"> **Starts:** {countdown}\n\n"
-            f"{map_display}\n\n"
+            f"> **Starts:** {countdown}\n"
+            f"> **Format:** {format.value}\n"
+            f"> {map_display}\n\n"
             f"⚠️ **Note**\n"
             f"- Inform staff beforehand if you cannot attend.\n"
         )
