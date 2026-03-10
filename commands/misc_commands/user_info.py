@@ -64,7 +64,7 @@ class UserInfo(commands.Cog):
 
         embed.add_field(
             name=f"Roles [{role_count}] ",
-            value=f"```role_display```",
+            value=f"```{role_display}```",
             inline=False
         )
 
@@ -75,14 +75,14 @@ class UserInfo(commands.Cog):
         )
 
         embed.add_field(
-            name="Is boosting",
+            name="Is boosting?",
             value=f"```{boosting}```",
             inline=True
         )
 
         embed.add_field(
             name="Global permissions",
-            value=f"```permissions```",
+            value=f"```{permissions}```",
             inline=False
         )
 
