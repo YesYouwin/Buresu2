@@ -121,7 +121,7 @@ class ScrimSchedule(commands.Cog):
             f"> **Time:** {time_display}\n"
             f"> **Starts:** {countdown}\n"
             f"> **Format:** {format.value}\n"
-            f"   {map_display}\n\n"
+            f"\u200b\u200b\u200b\u200b{map_display}\n\n"
             f"⚠️ **Note**\n"
             f"- Inform staff beforehand if you cannot attend.\n"
         )
