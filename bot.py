@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import os
+from discord import app_commands
 from flask import Flask
 from threading import Thread
 from dotenv import load_dotenv
@@ -99,7 +100,7 @@ class MyBot(commands.Bot):
             "commands.misc_commands.ping",
             "commands.misc_commands.server_info",
             "commands.misc_commands.user_info",
-            "commands.players.playerlogs",
+            "commands.players.player_logs",
             "commands.scrims.scrim_schedule",
 
         ]
