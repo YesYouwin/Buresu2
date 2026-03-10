@@ -80,7 +80,7 @@ class MyBot(commands.Bot):
         logging.info("Loading command modules...")
 
         extensions = [
-            "commands.players.playerlogs"
+            "commands.players.player_logs"
         ]
 
         for ext in extensions:
