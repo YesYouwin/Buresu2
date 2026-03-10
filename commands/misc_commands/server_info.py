@@ -165,8 +165,8 @@ class ServerInfo(commands.Cog):
         # -------------------------
 
         embed.add_field(
-            name=f"Server roles [{role_count}] (",
-            value=f"```role_display```",
+            name=f"Server roles [{role_count}] ",
+            value=f"```{role_display}```",
             inline=False
         )
 
