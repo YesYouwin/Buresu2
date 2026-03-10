@@ -40,32 +40,12 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-
 class MyBot(commands.Bot):
 
     async def setup_hook(self):
-
-        print("Loading command modules...")
-
-        extensions = [
-            "commands.misc_commands.ping",
-            "commands.misc_commands.server_info",
-            "commands.misc_commands.user_info",
-            "commands.players.player_logs",
-            "commands.scrims.scrim_schedule",
-        ]
-
-        for ext in extensions:
-            try:
-                await self.load_extension(ext)
-                print(f"Loaded {ext}")
-            except Exception as e:
-                print(f"Failed to load {ext}: {e}")
+        print("Starting bot setup...")
 
         guild = discord.Object(id=GUILD_ID)
-
-        print("Clearing old commands...")
-        self.tree.clear_commands(guild=guild)
 
         print("Syncing commands...")
         await self.tree.sync(guild=guild)
@@ -73,16 +53,25 @@ class MyBot(commands.Bot):
         print("Commands synced to development server.")
         print("New version running")
 
-
 bot = MyBot(command_prefix="!", intents=intents)
 
+# -----------------------------
+# EVENTS
+# -----------------------------
 
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
 
+# -----------------------------
+# TEST SLASH COMMAND
+# -----------------------------
 
-# Optional keep alive (safe to keep)
+@bot.tree.command(name="ping", description="Check if the bot is alive")
+async def ping(interaction: discord.Interaction):
+    await interaction.response.send_message("Pong!")
+
+
+
 keep_alive()
-
 bot.run(TOKEN)
