@@ -1,8 +1,8 @@
-
+import discord
 from discord import app_commands
 
 def is_staff():
-    async def predicate(interaction: app_commands.Interaction):
+    async def predicate(interaction: discord.Interaction):
         allowed_roles = [
             1447053023305269288,
             1446594998920417350,
