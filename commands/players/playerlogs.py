@@ -91,21 +91,20 @@ class PlayerLogs(commands.Cog):
 
 
         try:
-
-        await asyncio.wait_for(
-            await asyncio.to_thread(
-                save_log,
-                action.value,
-                str(discordname.id),
-                ign,
-                team1,
-                team2,
-                date,
-                trackerid,
-                reason
-            ),
-            timeout=10
-        )
+            await asyncio.wait_for(
+                await asyncio.to_thread(
+                    save_log,
+                    action.value,
+                    str(discordname.id),
+                    ign,
+                    team1,
+                    team2,
+                    date,
+                    trackerid,
+                    reason
+                ),
+                timeout=10
+            )
 
         except Exception:
 
