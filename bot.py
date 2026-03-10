@@ -187,6 +187,15 @@ async def on_app_command_completion(interaction, command):
         f"Slash command | {interaction.user} | /{command.name} | {interaction.guild}"
     )
 
+@bot.event
+async def on_ready():
+
+    init_db()
+
+    update_status.start()
+
+    logging.info(f"Logged in as {bot.user}")
+
 
 # -----------------------------
 # ERROR HANDLING
