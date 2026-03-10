@@ -16,7 +16,7 @@ class UserInfo(commands.Cog):
             user = interaction.user
 
         # Roles
-        roles = [role.mention for role in user.roles if role.name != "@everyone"]
+        roles = [role.name for role in user.roles if role.name != "@everyone"]
         role_count = len(roles)
 
         if len(roles) > 10:
