@@ -63,8 +63,8 @@ class UserInfo(commands.Cog):
         )
 
         embed.add_field(
-            name=f"Roles [{role_count}] (shows up to 10 roles)",
-            value=role_display,
+            name=f"Roles [{role_count}] ",
+            value=f"```role_display```",
             inline=False
         )
 
@@ -82,19 +82,19 @@ class UserInfo(commands.Cog):
 
         embed.add_field(
             name="Global permissions",
-            value=permissions,
+            value=f"```permissions```",
             inline=False
         )
 
         embed.add_field(
             name="Joined this server on",
-            value=f"```{user.joined_at.strftime('%m/%d/%Y %H:%M')}```\n({joined_string})",
+            value=f"```{user.joined_at.strftime('%m/%d/%Y %H:%M')}```\n{joined_string}",
             inline=False
         )
 
         embed.add_field(
             name="Account created on",
-            value=f"```{user.created_at.strftime('%m/%d/%Y %H:%M')}```\n({created_string})",
+            value=f"```{user.created_at.strftime('%m/%d/%Y %H:%M')}```\n{created_string}",
             inline=False
         )
 
