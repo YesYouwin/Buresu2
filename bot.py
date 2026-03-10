@@ -161,23 +161,62 @@ async def on_resumed():
 async def on_connect():
     logging.info("Bot connected to Discord")
 
+
 # ------------------------------------------------
 # COMMAND LOGGING
 # ------------------------------------------------
 
-@bot.event
-async def on_command(ctx):
+command_start_times = {}
 
-    logging.info(
-        f"Prefix command | user={ctx.author} | command=!{ctx.command} | guild={ctx.guild} | channel={ctx.channel}"
-    )
+
+def format_slash_command(interaction):
+
+    args = []
+
+    if interaction.namespace:
+        for key, value in vars(interaction.namespace).items():
+            args.append(str(value))
+
+    arg_string = " ".join(args)
+
+    if arg_string:
+        return f"/{interaction.command.name} {arg_string}"
+    else:
+        return f"/{interaction.command.name}"
+
+
+@bot.event
+async def on_app_command(interaction):
+
+    command_start_times[interaction.id] = asyncio.get_event_loop().time()
 
 
 @bot.event
 async def on_app_command_completion(interaction, command):
 
+    start = command_start_times.pop(interaction.id, None)
+
+    duration = 0
+    if start:
+        duration = round(asyncio.get_event_loop().time() - start, 3)
+
+    command_string = format_slash_command(interaction)
+
     logging.info(
-        f"Slash command | user={interaction.user} | command=/{command.name} | guild={interaction.guild} | channel={interaction.channel}"
+        f"Slash command | user={interaction.user} "
+        f"| command={command_string} "
+        f"| channel={interaction.channel} "
+        f"| took={duration}s"
+    )
+
+
+@bot.event
+async def on_command(ctx):
+
+    logging.info(
+        f"Prefix command | user={ctx.author} "
+        f"| command=!{ctx.command} "
+        f"| channel={ctx.channel}"
     )
 
 # ------------------------------------------------
