@@ -4,6 +4,7 @@ import os
 from flask import Flask
 from threading import Thread
 from dotenv import load_dotenv
+from database.db import init_db
 
 # -----------------------------
 # LOAD ENV VARIABLES
@@ -64,6 +65,7 @@ bot = MyBot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
+    init_db()
     print(f"Logged in as {bot.user}")
 
 
