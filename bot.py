@@ -6,6 +6,8 @@ from flask import Flask
 from threading import Thread
 from dotenv import load_dotenv
 from database.db import init_db
+import psutil
+from discord.ext import tasks
 import logging
 import asyncio
 import traceback
@@ -148,6 +150,22 @@ async def on_ready():
 
     logging.info(f"Logged in as {bot.user}")
     logging.info("Bot successfully started")
+
+    @tasks.loop(seconds=30)
+    async def update_status():
+
+        cpu = psutil.cpu_percent()
+        ram = psutil.virtual_memory().used / 1024 / 1024
+        ping = round(bot.latency * 1000)
+
+        status = f"CPU {cpu}% | RAM {ram:.0f}MB | {ping}ms"
+
+        await bot.change_presence(
+            activity=discord.Activity(
+                type=discord.ActivityType.watching,
+                name=status
+            )
+        )
 
 
 # -----------------------------
