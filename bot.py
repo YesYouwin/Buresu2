@@ -1,13 +1,13 @@
 import discord
 from discord.ext import commands
-import os
 from discord import app_commands
+from discord.ext import tasks
+import os
 from flask import Flask
 from threading import Thread
 from dotenv import load_dotenv
 from database.db import init_db
 import psutil
-from discord.ext import tasks
 import logging
 import asyncio
 import traceback
@@ -98,13 +98,11 @@ class MyBot(commands.Bot):
         logging.info("Loading command modules...")
 
         extensions = [
-
             "commands.misc_commands.ping",
             "commands.misc_commands.server_info",
             "commands.misc_commands.user_info",
             "commands.players.player_logs",
             "commands.scrims.scrim_schedule",
-
         ]
 
         for ext in extensions:
@@ -133,6 +131,27 @@ bot = MyBot(command_prefix="!", intents=intents)
 
 
 # -----------------------------
+# BOT STATUS LOOP
+# -----------------------------
+
+@tasks.loop(seconds=30)
+async def update_status():
+
+    cpu = psutil.cpu_percent()
+    ram = psutil.virtual_memory().used / 1024 / 1024
+    ping = round(bot.latency * 1000)
+
+    status = f"CPU {cpu}% | RAM {ram:.0f}MB | {ping}ms"
+
+    await bot.change_presence(
+        activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name=status
+        )
+    )
+
+
+# -----------------------------
 # EVENTS
 # -----------------------------
 
@@ -148,24 +167,10 @@ async def on_ready():
 
     logging.getLogger().addHandler(discord_handler)
 
+    update_status.start()
+
     logging.info(f"Logged in as {bot.user}")
     logging.info("Bot successfully started")
-
-    @tasks.loop(seconds=30)
-    async def update_status():
-
-        cpu = psutil.cpu_percent()
-        ram = psutil.virtual_memory().used / 1024 / 1024
-        ping = round(bot.latency * 1000)
-
-        status = f"CPU {cpu}% | RAM {ram:.0f}MB | {ping}ms"
-
-        await bot.change_presence(
-            activity=discord.Activity(
-                type=discord.ActivityType.watching,
-                name=status
-            )
-        )
 
 
 # -----------------------------
@@ -186,15 +191,6 @@ async def on_app_command_completion(interaction, command):
     logging.info(
         f"Slash command | {interaction.user} | /{command.name} | {interaction.guild}"
     )
-
-@bot.event
-async def on_ready():
-
-    init_db()
-
-    update_status.start()
-
-    logging.info(f"Logged in as {bot.user}")
 
 
 # -----------------------------
