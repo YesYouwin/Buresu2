@@ -108,19 +108,19 @@ class ServerInfo(commands.Cog):
 
         embed.add_field(
             name="Server name",
-            value=f"`{guild.name}`",
+            value=f"```{guild.name}```",
             inline=True
         )
 
         embed.add_field(
             name="Server owner ID",
-            value=f"`{guild.owner_id}`",
+            value=f"```{guild.owner_id}```",
             inline=True
         )
 
         embed.add_field(
             name=f"Server members [{guild.member_count}]",
-            value=f"Members: `{members}` | Bots: `{bots}`",
+            value=f"Members: ```{members}``` | Bots: ```{bots}```",
             inline=False
         )
 
@@ -130,13 +130,13 @@ class ServerInfo(commands.Cog):
 
         embed.add_field(
             name="Server ID",
-            value=f"`{guild.id}`",
+            value=f"```{guild.id}```",
             inline=True
         )
 
         embed.add_field(
             name="Server boosts",
-            value=f"`{boosts}` (level `{boost_level}`) | Progress `{boost_progress}`",
+            value=f"```{boosts}``` (level ```{boost_level}```) | Progress ```{boost_progress}```",
             inline=True
         )
 
@@ -146,7 +146,7 @@ class ServerInfo(commands.Cog):
 
         embed.add_field(
             name=f"Server categories and channels [{categories + text + voice + stage}]",
-            value=f"Categories: `{categories}` | Text: `{text}` | Voice: `{voice}` | Announcement: `{announcement}` | Stage: `{stage}`",
+            value=f"Categories: ```{categories}``` | Text: ```{text}``` | Voice: ```{voice}``` | Announcement: ```{announcement}``` | Stage: ```{stage}```",
             inline=False
         )
 
@@ -156,7 +156,7 @@ class ServerInfo(commands.Cog):
 
         embed.add_field(
             name=f"Server emojis and stickers [{normal_emojis + animated_emojis + stickers}]",
-            value=f"Normal: `{normal_emojis}` | Animated: `{animated_emojis}` | Stickers: `{stickers}`",
+            value=f"Normal: ```{normal_emojis}``` | Animated: ```{animated_emojis}``` | Stickers: ```{stickers}```",
             inline=False
         )
 
@@ -176,13 +176,13 @@ class ServerInfo(commands.Cog):
 
         embed.add_field(
             name="Verification level",
-            value=f"`{verification}`",
+            value=f"```{verification}```",
             inline=True
         )
 
         embed.add_field(
             name="NSFW level",
-            value=f"`{guild.nsfw_level.name}`",
+            value=f"```{guild.nsfw_level.name}```",
             inline=True
         )
 
@@ -192,7 +192,7 @@ class ServerInfo(commands.Cog):
 
         embed.add_field(
             name="Server created on (MM/DD/YYYY)",
-            value=f"`{guild.created_at.strftime('%m/%d/%Y %H:%M')}` ({created_string})",
+            value=f"```{guild.created_at.strftime('%m/%d/%Y %H:%M')}``` ({created_string})",
             inline=False
         )
 
