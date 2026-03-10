@@ -98,7 +98,17 @@ logger.addHandler(console_handler)
 logging.getLogger("discord").setLevel(logging.INFO)
 logging.getLogger("discord.http").setLevel(logging.INFO)
 
+class PrintLogger:
+    def write(self, message):
+        message = message.strip()
+        if message:
+            logging.info(message)
 
+    def flush(self):
+        pass
+
+sys.stdout = PrintLogger()
+sys.stderr = PrintLogger()
 # ------------------------------------------------
 # BOT SETUP
 # ------------------------------------------------
@@ -276,7 +286,13 @@ def handle_exception(loop, context):
 loop = asyncio.get_event_loop()
 loop.set_exception_handler(handle_exception)
 
+def excepthook(exc_type, exc_value, exc_traceback):
+    logging.error(
+        "Uncaught exception",
+        exc_info=(exc_type, exc_value, exc_traceback)
+    )
 
+sys.excepthook = excepthook
 # ------------------------------------------------
 # START BOT
 # ------------------------------------------------
