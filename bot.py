@@ -71,6 +71,7 @@ class MyBot(commands.Bot):
         await self.tree.sync(guild=guild)
 
         print("Commands synced to development server.")
+        print("New version running")
 
 
 bot = MyBot(command_prefix="!", intents=intents)
