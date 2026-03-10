@@ -40,7 +40,23 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+
+class MyBot(commands.Bot):
+
+    async def setup_hook(self):
+
+        print("Syncing slash commands...")
+
+        guild = discord.Object(id=GUILD_ID)
+
+        # sync commands to your test server instantly
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
+
+        print("Slash commands synced")
+
+
+bot = MyBot(command_prefix="!", intents=intents)
 
 # -----------------------------
 # EVENTS
@@ -49,7 +65,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
-    print("New version running")
+
 
 # -----------------------------
 # PREFIX COMMAND
@@ -58,6 +74,14 @@ async def on_ready():
 @bot.command()
 async def ping(ctx):
     await ctx.send("Pong!")
+
+# -----------------------------
+# SLASH COMMAND
+# -----------------------------
+
+@bot.tree.command(name="ping", description="Check if the bot is alive")
+async def slash_ping(interaction: discord.Interaction):
+    await interaction.response.send_message("Pong!")
 
 # -----------------------------
 # START BOT
