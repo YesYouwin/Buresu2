@@ -87,13 +87,13 @@ class UserInfo(commands.Cog):
         )
 
         embed.add_field(
-            name="Joined this server on (MM/DD/YYYY)",
+            name="Joined this server on",
             value=f"`{user.joined_at.strftime('%m/%d/%Y %H:%M')}`\n({joined_string})",
             inline=False
         )
 
         embed.add_field(
-            name="Account created on (MM/DD/YYYY)",
+            name="Account created on",
             value=f"`{user.created_at.strftime('%m/%d/%Y %H:%M')}`\n({created_string})",
             inline=False
         )
