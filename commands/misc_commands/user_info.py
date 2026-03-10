@@ -52,13 +52,13 @@ class UserInfo(commands.Cog):
 
         embed.add_field(
             name="Username",
-            value=f"`{user.name}`",
+            value=f"```{user.name}```",
             inline=True
         )
 
         embed.add_field(
             name="User ID",
-            value=f"`{user.id}`",
+            value=f"```{user.id}```",
             inline=True
         )
 
@@ -70,13 +70,13 @@ class UserInfo(commands.Cog):
 
         embed.add_field(
             name="Nickname",
-            value=f"`{user.nick if user.nick else 'None'}`",
+            value=f"```{user.nick if user.nick else 'None'}```",
             inline=True
         )
 
         embed.add_field(
             name="Is boosting",
-            value=f"`{boosting}`",
+            value=f"```{boosting}```",
             inline=True
         )
 
@@ -88,13 +88,13 @@ class UserInfo(commands.Cog):
 
         embed.add_field(
             name="Joined this server on",
-            value=f"`{user.joined_at.strftime('%m/%d/%Y %H:%M')}`\n({joined_string})",
+            value=f"```{user.joined_at.strftime('%m/%d/%Y %H:%M')}```\n({joined_string})",
             inline=False
         )
 
         embed.add_field(
             name="Account created on",
-            value=f"`{user.created_at.strftime('%m/%d/%Y %H:%M')}`\n({created_string})",
+            value=f"```{user.created_at.strftime('%m/%d/%Y %H:%M')}```\n({created_string})",
             inline=False
         )
 
