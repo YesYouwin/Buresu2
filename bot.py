@@ -283,4 +283,3 @@ loop.set_exception_handler(handle_exception)
 
 keep_alive()
 bot.run(TOKEN)
-````
