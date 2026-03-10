@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from database.db import init_db
 import logging
 import asyncio
+import traceback
 
 load_dotenv()
 
@@ -19,19 +20,23 @@ LOG_CHANNEL = int(os.getenv("LOG_CHANNEL"))
 # -----------------------------
 
 class DiscordLogHandler(logging.Handler):
+
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
 
     def emit(self, record):
+
         log_entry = self.format(record)
 
         async def send():
             try:
                 channel = self.bot.get_channel(LOG_CHANNEL)
+
                 if channel:
                     await channel.send(f"```{log_entry[:1900]}```")
-            except:
+
+            except Exception:
                 pass
 
         try:
@@ -58,6 +63,7 @@ def keep_alive():
     t.daemon = True
     t.start()
 
+
 # -----------------------------
 # BOT SETUP
 # -----------------------------
@@ -71,30 +77,33 @@ class MyBot(commands.Bot):
 
     async def setup_hook(self):
 
-        print("Loading command modules...")
+        logging.info("Loading command modules...")
 
         extensions = [
             "commands.players.playerlogs"
         ]
 
         for ext in extensions:
+
             try:
                 await self.load_extension(ext)
-                print(f"Loaded {ext}")
-            except Exception as e:
-                logging.exception(f"Failed to load {ext}")
+                logging.info(f"Loaded extension: {ext}")
 
-        print("Syncing slash commands...")
+            except Exception:
+                logging.exception(f"Failed to load extension: {ext}")
+
+        logging.info("Syncing slash commands...")
 
         guild = discord.Object(id=GUILD_ID)
 
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
 
-        print("Slash commands synced")
+        logging.info("Slash commands synced")
 
 
 bot = MyBot(command_prefix="!", intents=intents)
+
 
 # -----------------------------
 # LOGGING SETUP
@@ -104,8 +113,12 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+console_handler.setFormatter(
+    logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
+)
+
 logger.addHandler(console_handler)
+
 
 # -----------------------------
 # EVENTS
@@ -117,7 +130,9 @@ async def on_ready():
     init_db()
 
     discord_handler = DiscordLogHandler(bot)
-    discord_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    discord_handler.setFormatter(
+        logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
+    )
 
     logging.getLogger().addHandler(discord_handler)
 
@@ -126,12 +141,65 @@ async def on_ready():
 
 
 # -----------------------------
+# COMMAND LOGGING
+# -----------------------------
+
+@bot.event
+async def on_command(ctx):
+
+    logging.info(
+        f"Prefix command used | {ctx.author} | !{ctx.command} | {ctx.guild}"
+    )
+
+
+@bot.event
+async def on_app_command_completion(interaction, command):
+
+    logging.info(
+        f"Slash command used | {interaction.user} | /{command.name} | {interaction.guild}"
+    )
+
+
+# -----------------------------
+# ERROR HANDLING
+# -----------------------------
+
+@bot.event
+async def on_command_error(ctx, error):
+
+    logging.error(f"Prefix command error: {error}")
+
+    traceback_str = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+
+    logging.error(traceback_str)
+
+
+@bot.tree.error
+async def on_app_command_error(interaction, error):
+
+    logging.error(f"Slash command error: {error}")
+
+    traceback_str = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+
+    logging.error(traceback_str)
+
+    try:
+        await interaction.response.send_message(
+            "❌ Command error occurred.", ephemeral=True
+        )
+    except:
+        pass
+
+
+# -----------------------------
 # PREFIX COMMAND
 # -----------------------------
 
 @bot.command()
 async def ping(ctx):
+
     await ctx.send("Pong!")
+
 
 # -----------------------------
 # SLASH COMMAND
@@ -139,7 +207,9 @@ async def ping(ctx):
 
 @bot.tree.command(name="ping", description="Check if the bot is alive")
 async def slash_ping(interaction: discord.Interaction):
+
     await interaction.response.send_message("Pong!")
+
 
 # -----------------------------
 # START BOT
