@@ -1,7 +1,7 @@
+````python
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
-from discord.ext import tasks
 import os
 from flask import Flask
 from threading import Thread
@@ -11,6 +11,7 @@ import psutil
 import logging
 import asyncio
 import traceback
+import sys
 
 load_dotenv()
 
@@ -18,15 +19,16 @@ TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 LOG_CHANNEL = int(os.getenv("LOG_CHANNEL"))
 
-# -----------------------------
-# DISCORD LOGGING HANDLER
-# -----------------------------
+# ------------------------------------------------
+# DISCORD LOGGING HANDLER (MULTI-MESSAGE SUPPORT)
+# ------------------------------------------------
 
 class DiscordLogHandler(logging.Handler):
 
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
+        self.max_length = 1900
 
     def emit(self, record):
 
@@ -36,10 +38,20 @@ class DiscordLogHandler(logging.Handler):
             try:
                 channel = self.bot.get_channel(LOG_CHANNEL)
 
-                if channel:
-                    await channel.send(f"```{log_entry[:1900]}```")
+                if not channel:
+                    return
 
-            except:
+                # Split logs into chunks so nothing is cut
+                chunks = [
+                    log_entry[i:i+self.max_length]
+                    for i in range(0, len(log_entry), self.max_length)
+                ]
+
+                for chunk in chunks:
+                    await channel.send(f"```{chunk}```")
+                    await asyncio.sleep(0.3)
+
+            except Exception:
                 pass
 
         try:
@@ -48,9 +60,9 @@ class DiscordLogHandler(logging.Handler):
             pass
 
 
-# -----------------------------
-# KEEP ALIVE SERVER
-# -----------------------------
+# ------------------------------------------------
+# KEEP ALIVE SERVER (for uptime services)
+# ------------------------------------------------
 
 app = Flask(__name__)
 
@@ -67,24 +79,30 @@ def keep_alive():
     t.start()
 
 
-# -----------------------------
+# ------------------------------------------------
 # LOGGING SETUP
-# -----------------------------
+# ------------------------------------------------
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(
-    logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 )
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 
+# capture discord.py logs too
+logging.getLogger("discord").setLevel(logging.INFO)
+logging.getLogger("discord.http").setLevel(logging.INFO)
 
-# -----------------------------
+
+# ------------------------------------------------
 # BOT SETUP
-# -----------------------------
+# ------------------------------------------------
 
 intents = discord.Intents.default()
 intents.members = True
@@ -130,9 +148,9 @@ class MyBot(commands.Bot):
 bot = MyBot(command_prefix="!", intents=intents)
 
 
-# -----------------------------
+# ------------------------------------------------
 # BOT STATUS LOOP
-# -----------------------------
+# ------------------------------------------------
 
 @tasks.loop(seconds=30)
 async def update_status():
@@ -151,9 +169,9 @@ async def update_status():
     )
 
 
-# -----------------------------
+# ------------------------------------------------
 # EVENTS
-# -----------------------------
+# ------------------------------------------------
 
 @bot.event
 async def on_ready():
@@ -173,15 +191,33 @@ async def on_ready():
     logging.info("Bot successfully started")
 
 
-# -----------------------------
+@bot.event
+async def on_disconnect():
+
+    logging.warning("Bot disconnected from Discord gateway")
+
+
+@bot.event
+async def on_resumed():
+
+    logging.info("Bot resumed session successfully")
+
+
+@bot.event
+async def on_connect():
+
+    logging.info("Bot connected to Discord")
+
+
+# ------------------------------------------------
 # COMMAND LOGGING
-# -----------------------------
+# ------------------------------------------------
 
 @bot.event
 async def on_command(ctx):
 
     logging.info(
-        f"Prefix command | {ctx.author} | !{ctx.command} | {ctx.guild}"
+        f"Prefix command | user={ctx.author} | command=!{ctx.command} | guild={ctx.guild} | channel={ctx.channel}"
     )
 
 
@@ -189,48 +225,63 @@ async def on_command(ctx):
 async def on_app_command_completion(interaction, command):
 
     logging.info(
-        f"Slash command | {interaction.user} | /{command.name} | {interaction.guild}"
+        f"Slash command | user={interaction.user} | command=/{command.name} | guild={interaction.guild} | channel={interaction.channel}"
     )
 
 
-# -----------------------------
+# ------------------------------------------------
 # ERROR HANDLING
-# -----------------------------
+# ------------------------------------------------
 
 @bot.event
 async def on_command_error(ctx, error):
-
-    logging.error(f"Prefix command error: {error}")
 
     traceback_str = "".join(
         traceback.format_exception(type(error), error, error.__traceback__)
     )
 
-    logging.error(traceback_str)
+    logging.error(
+        f"Prefix command error | user={ctx.author} | command=!{ctx.command}\n{traceback_str}"
+    )
 
 
 @bot.tree.error
 async def on_app_command_error(interaction, error):
 
-    logging.error(f"Slash command error: {error}")
-
     traceback_str = "".join(
         traceback.format_exception(type(error), error, error.__traceback__)
     )
 
-    logging.error(traceback_str)
+    logging.error(
+        f"Slash command error | user={interaction.user} | command={interaction.command}\n{traceback_str}"
+    )
 
     try:
         await interaction.response.send_message(
             "❌ Command error occurred.", ephemeral=True
         )
-    except:
+    except Exception:
         pass
 
 
-# -----------------------------
+# ------------------------------------------------
+# GLOBAL ERROR HANDLING
+# ------------------------------------------------
+
+def handle_exception(loop, context):
+
+    msg = context.get("exception", context["message"])
+    logging.error(f"Global async exception: {msg}")
+
+
+loop = asyncio.get_event_loop()
+loop.set_exception_handler(handle_exception)
+
+
+# ------------------------------------------------
 # START BOT
-# -----------------------------
+# ------------------------------------------------
 
 keep_alive()
 bot.run(TOKEN)
+````
