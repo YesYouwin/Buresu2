@@ -15,7 +15,7 @@ TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 
 # -----------------------------
-# KEEP ALIVE SERVER (OPTIONAL)
+# KEEP ALIVE SERVER
 # -----------------------------
 
 app = Flask(__name__)
@@ -37,23 +37,10 @@ def keep_alive():
 # -----------------------------
 
 intents = discord.Intents.default()
-intents.members = True
 intents.message_content = True
+intents.members = True
 
-class MyBot(commands.Bot):
-
-    async def setup_hook(self):
-        print("Starting bot setup...")
-
-        guild = discord.Object(id=GUILD_ID)
-
-        print("Syncing commands...")
-        await self.tree.sync(guild=guild)
-
-        print("Commands synced to development server.")
-        print("New version running")
-
-bot = MyBot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 # -----------------------------
 # EVENTS
@@ -62,16 +49,19 @@ bot = MyBot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
+    print("New version running")
 
 # -----------------------------
-# TEST SLASH COMMAND
+# PREFIX COMMAND
 # -----------------------------
 
-@bot.tree.command(name="ping", description="Check if the bot is alive")
-async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message("Pong!")
+@bot.command()
+async def ping(ctx):
+    await ctx.send("Pong!")
 
-
+# -----------------------------
+# START BOT
+# -----------------------------
 
 keep_alive()
 bot.run(TOKEN)
