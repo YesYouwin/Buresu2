@@ -36,7 +36,7 @@ class DiscordLogHandler(logging.Handler):
                 if channel:
                     await channel.send(f"```{log_entry[:1900]}```")
 
-            except Exception:
+            except:
                 pass
 
         try:
@@ -65,47 +65,6 @@ def keep_alive():
 
 
 # -----------------------------
-# BOT SETUP
-# -----------------------------
-
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
-
-
-class MyBot(commands.Bot):
-
-    async def setup_hook(self):
-
-        logging.info("Loading command modules...")
-
-        extensions = [
-            "commands.players.player_logs"
-        ]
-
-        for ext in extensions:
-
-            try:
-                await self.load_extension(ext)
-                logging.info(f"Loaded extension: {ext}")
-
-            except Exception:
-                logging.exception(f"Failed to load extension: {ext}")
-
-        logging.info("Syncing slash commands...")
-
-        guild = discord.Object(id=GUILD_ID)
-
-        self.tree.copy_global_to(guild=guild)
-        await self.tree.sync(guild=guild)
-
-        logging.info("Slash commands synced")
-
-
-bot = MyBot(command_prefix="!", intents=intents)
-
-
-# -----------------------------
 # LOGGING SETUP
 # -----------------------------
 
@@ -118,6 +77,56 @@ console_handler.setFormatter(
 )
 
 logger.addHandler(console_handler)
+
+
+# -----------------------------
+# BOT SETUP
+# -----------------------------
+
+intents = discord.Intents.default()
+intents.members = True
+intents.message_content = True
+
+
+class MyBot(commands.Bot):
+
+    async def setup_hook(self):
+
+        logging.info("Loading command modules...")
+
+        extensions = [
+
+            "commands.misc_commands.ping",
+            "commands.misc_commands.server_info",
+            "commands.misc_commands.user_info",
+            "commands.players.playerlogs",
+            "commands.scrims.scrim_schedule",
+
+        ]
+
+        for ext in extensions:
+
+            try:
+                await self.load_extension(ext)
+                logging.info(f"Loaded extension: {ext}")
+
+            except Exception:
+                logging.exception(f"Failed to load extension: {ext}")
+
+        guild = discord.Object(id=GUILD_ID)
+
+        logging.info("Clearing old slash commands...")
+        self.tree.clear_commands(guild=guild)
+
+        logging.info("Syncing slash commands...")
+
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
+
+        logging.info("Commands synced to development server")
+
+
+bot = MyBot(command_prefix="!", intents=intents)
 
 
 # -----------------------------
@@ -148,7 +157,7 @@ async def on_ready():
 async def on_command(ctx):
 
     logging.info(
-        f"Prefix command used | {ctx.author} | !{ctx.command} | {ctx.guild}"
+        f"Prefix command | {ctx.author} | !{ctx.command} | {ctx.guild}"
     )
 
 
@@ -156,7 +165,7 @@ async def on_command(ctx):
 async def on_app_command_completion(interaction, command):
 
     logging.info(
-        f"Slash command used | {interaction.user} | /{command.name} | {interaction.guild}"
+        f"Slash command | {interaction.user} | /{command.name} | {interaction.guild}"
     )
 
 
@@ -169,7 +178,9 @@ async def on_command_error(ctx, error):
 
     logging.error(f"Prefix command error: {error}")
 
-    traceback_str = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+    traceback_str = "".join(
+        traceback.format_exception(type(error), error, error.__traceback__)
+    )
 
     logging.error(traceback_str)
 
@@ -179,7 +190,9 @@ async def on_app_command_error(interaction, error):
 
     logging.error(f"Slash command error: {error}")
 
-    traceback_str = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+    traceback_str = "".join(
+        traceback.format_exception(type(error), error, error.__traceback__)
+    )
 
     logging.error(traceback_str)
 
@@ -189,26 +202,6 @@ async def on_app_command_error(interaction, error):
         )
     except:
         pass
-
-
-# -----------------------------
-# PREFIX COMMAND
-# -----------------------------
-
-@bot.command()
-async def ping(ctx):
-
-    await ctx.send("Pong!")
-
-
-# -----------------------------
-# SLASH COMMAND
-# -----------------------------
-
-@bot.tree.command(name="ping", description="Check if the bot is alive")
-async def slash_ping(interaction: discord.Interaction):
-
-    await interaction.response.send_message("Pong!")
 
 
 # -----------------------------
