@@ -47,26 +47,44 @@ class PlayerLogs(commands.Cog):
             )
             return
 
+        emoji = (
+            "<:Plus:1438977678890766517>"
+            if action.value in ["Recruitment", "Promotion"]
+            else "<:Negative:1438979843252289656>"
+        )
+
+        color = (
+            discord.Color.green()
+            if action.value in ["Recruitment", "Promotion"]
+            else discord.Color.red()
+        )
+
+        divider = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
         embed = discord.Embed(
-            title=f"{action.value}",
             description=f"""
+{divider}
+**{emoji} {action.value}**
+
 {discordname.mention}
 
-**IGN:** [{ign}]({trackerid})
+**IGN -** [{ign}]({trackerid})
 
 **{team1} ➜ {team2}**
 
-**Date:** {formatted_date}
+**Date -** {formatted_date}
 
-**Reason:** {reason}
+**Reason —** *{reason}*
+{divider}
 """,
-            color=discord.Color.green(),
+            color=color,
         )
 
         embed.set_thumbnail(url=discordname.display_avatar.url)
+        embed.set_footer(text=f"© Buresu • {datetime.now().year}")
 
         log_channel = self.bot.get_channel(1443545539445653604)
+
 
         if log_channel:
             await log_channel.send(embed=embed)
@@ -74,6 +92,7 @@ class PlayerLogs(commands.Cog):
 
         try:
 
+        await asyncio.wait_for(
             await asyncio.to_thread(
                 save_log,
                 action.value,
@@ -84,7 +103,9 @@ class PlayerLogs(commands.Cog):
                 date,
                 trackerid,
                 reason
-            )
+            ),
+            timeout=10
+        )
 
         except Exception:
 
@@ -107,34 +128,95 @@ class PlayerLogs(commands.Cog):
     @app_commands.command(name="playerhistory", description="Retrieve player history")
     async def playerhistory(self, interaction: discord.Interaction, search: str):
 
+
         await interaction.response.defer(ephemeral=True)
 
-        rows = await asyncio.to_thread(search_logs, search)
+        search = search.strip()
+
+        if search.startswith("<@") and search.endswith(">"):
+            search = search.replace("<@", "").replace(">", "").replace("!", "")
+
+        try:
+            rows = await asyncio.wait_for(
+                asyncio.to_thread(search_logs, search),
+                timeout=10
+            )        
+        except Exception:
+            error_msg = traceback.format_exc()
+
+            print(error_msg)
+
+            await interaction.followup.send(
+                f"❌ Database Error:\n```{error_msg[:1900]}```",
+                 ephemeral=True
+            )
+            return
 
         if not rows:
             await interaction.followup.send("❌ No logs found.", ephemeral=True)
             return
 
+        divider = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        await interaction.followup.send(
+            f"📜 Found **{len(rows)}** log(s) for `{search}`", ephemeral=True
+        )
 
         for action, discord_id, ign, team1, team2, date, trackerid, reason in rows:
 
-            embed = discord.Embed(
-                title=action,
-                description=f"""
-<@{discord_id}>
+            try:
+                user = await self.bot.fetch_user(int(discord_id))
+                mention = user.mention
+                avatar = user.display_avatar.url
+            except:
+                mention = f"<@{discord_id}>"
+                avatar = None
 
-**IGN:** [{ign}]({trackerid})
+            emoji = (
+                "<:Plus:1438977678890766517>"
+                if action in ["Recruitment", "Promotion"]
+                else "<:Negative:1438979843252289656>"
+            )
+
+            color = (
+                discord.Color.green()
+                if action in ["Recruitment", "Promotion"]
+                else discord.Color.red()
+            )
+
+            try:
+                parsed = datetime.strptime(date, "%d/%m/%Y")
+                formatted_date = f"{date} [{parsed.strftime('%A')}]"
+            except:
+                formatted_date = date
+
+            embed = discord.Embed(
+                description=f"""
+{divider}
+**{emoji} {action}**
+
+{mention}
+
+**IGN -** [{ign}]({trackerid})
 
 **{team1} ➜ {team2}**
 
-**Date:** {date}
+**Date -** {formatted_date}
 
-**Reason:** {reason}
+**Reason —** *{reason}*
+{divider}
 """,
-                color=discord.Color.blue(),
+                color=color,
             )
 
+            if avatar:
+                embed.set_thumbnail(url=avatar)
+
+            embed.set_footer(text=f"© Buresu • {datetime.now().year}")
+
             await interaction.followup.send(embed=embed, ephemeral=True)
+            await asyncio.sleep(0.2)
+
 
 
 
