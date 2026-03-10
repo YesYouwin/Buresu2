@@ -16,51 +16,9 @@ load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
-LOG_CHANNEL = int(os.getenv("LOG_CHANNEL"))
 
 # ------------------------------------------------
-# DISCORD LOGGING HANDLER (MULTI-MESSAGE SUPPORT)
-# ------------------------------------------------
-
-class DiscordLogHandler(logging.Handler):
-
-    def __init__(self, bot):
-        super().__init__()
-        self.bot = bot
-        self.max_length = 1900
-
-    def emit(self, record):
-
-        log_entry = self.format(record)
-
-        async def send():
-            try:
-                channel = self.bot.get_channel(LOG_CHANNEL)
-
-                if not channel:
-                    return
-
-                # Split logs into chunks so nothing is cut
-                chunks = [
-                    log_entry[i:i+self.max_length]
-                    for i in range(0, len(log_entry), self.max_length)
-                ]
-
-                for chunk in chunks:
-                    await channel.send(f"```{chunk}```")
-                    await asyncio.sleep(0.3)
-
-            except Exception:
-                pass
-
-        try:
-            asyncio.create_task(send())
-        except RuntimeError:
-            pass
-
-
-# ------------------------------------------------
-# KEEP ALIVE SERVER (for uptime services)
+# KEEP ALIVE SERVER
 # ------------------------------------------------
 
 app = Flask(__name__)
@@ -77,9 +35,8 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-
 # ------------------------------------------------
-# LOGGING SETUP
+# LOGGING SETUP (console only → journalctl captures it)
 # ------------------------------------------------
 
 logger = logging.getLogger()
@@ -94,10 +51,11 @@ console_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 
-# capture discord.py logs too
+# capture discord.py logs
 logging.getLogger("discord").setLevel(logging.INFO)
 logging.getLogger("discord.http").setLevel(logging.INFO)
 
+# Redirect print() to logging
 class PrintLogger:
     def write(self, message):
         message = message.strip()
@@ -109,6 +67,7 @@ class PrintLogger:
 
 sys.stdout = PrintLogger()
 sys.stderr = PrintLogger()
+
 # ------------------------------------------------
 # BOT SETUP
 # ------------------------------------------------
@@ -133,11 +92,9 @@ class MyBot(commands.Bot):
         ]
 
         for ext in extensions:
-
             try:
                 await self.load_extension(ext)
                 logging.info(f"Loaded extension: {ext}")
-
             except Exception:
                 logging.exception(f"Failed to load extension: {ext}")
 
@@ -155,7 +112,6 @@ class MyBot(commands.Bot):
 
 
 bot = MyBot(command_prefix="!", intents=intents)
-
 
 # ------------------------------------------------
 # BOT STATUS LOOP
@@ -177,7 +133,6 @@ async def update_status():
         )
     )
 
-
 # ------------------------------------------------
 # EVENTS
 # ------------------------------------------------
@@ -186,14 +141,6 @@ async def update_status():
 async def on_ready():
 
     init_db()
-
-    discord_handler = DiscordLogHandler(bot)
-    discord_handler.setFormatter(
-        logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-    )
-
-    logging.getLogger().addHandler(discord_handler)
-
     update_status.start()
 
     logging.info(f"Logged in as {bot.user}")
@@ -202,21 +149,17 @@ async def on_ready():
 
 @bot.event
 async def on_disconnect():
-
     logging.warning("Bot disconnected from Discord gateway")
 
 
 @bot.event
 async def on_resumed():
-
     logging.info("Bot resumed session successfully")
 
 
 @bot.event
 async def on_connect():
-
     logging.info("Bot connected to Discord")
-
 
 # ------------------------------------------------
 # COMMAND LOGGING
@@ -236,7 +179,6 @@ async def on_app_command_completion(interaction, command):
     logging.info(
         f"Slash command | user={interaction.user} | command=/{command.name} | guild={interaction.guild} | channel={interaction.channel}"
     )
-
 
 # ------------------------------------------------
 # ERROR HANDLING
@@ -272,7 +214,6 @@ async def on_app_command_error(interaction, error):
     except Exception:
         pass
 
-
 # ------------------------------------------------
 # GLOBAL ERROR HANDLING
 # ------------------------------------------------
@@ -283,8 +224,8 @@ def handle_exception(loop, context):
     logging.error(f"Global async exception: {msg}")
 
 
-loop = asyncio.get_event_loop()
-loop.set_exception_handler(handle_exception)
+asyncio.get_event_loop().set_exception_handler(handle_exception)
+
 
 def excepthook(exc_type, exc_value, exc_traceback):
     logging.error(
@@ -292,7 +233,9 @@ def excepthook(exc_type, exc_value, exc_traceback):
         exc_info=(exc_type, exc_value, exc_traceback)
     )
 
+
 sys.excepthook = excepthook
+
 # ------------------------------------------------
 # START BOT
 # ------------------------------------------------
