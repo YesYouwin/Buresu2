@@ -106,7 +106,7 @@ class LogsView(discord.ui.View):
         text = f"{title} (Page {self.page+1}/{total_pages})\n\n"
 
         for log in page_logs:
-            if len(text) + len(log) + 5 > MAX_DISCORD_MSG:  # 5 for the wrapping ```ansi
+            if len(text) + len(log) + 10 > MAX_DISCORD_MSG:
                 text += "...(truncated)\n"
                 break
             text += f"{log}\n"
