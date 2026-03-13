@@ -17,9 +17,10 @@ load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
+start_time = time.time()
 
 # ---------------------------------------------
-# KEEP ALIVE SERVERecho $TOKEN
+# KEEP ALIVE SERVER
 # ---------------------------------------------
 
 app = Flask(__name__)
