@@ -95,14 +95,11 @@ class LogsView(discord.ui.View):
     def format_page(self):
         MAX_DISCORD_MSG = 2000
         total_pages = max(1, math.ceil(len(self.logs) / LOGS_PER_PAGE))
-
         start = self.page * LOGS_PER_PAGE
         end = start + LOGS_PER_PAGE
-
         page_logs = self.logs[start:end]
 
         title = "⚠️ Errors & Warnings" if self.errors_only else "📜 Bot Logs"
-
         text = f"{title} (Page {self.page+1}/{total_pages})\n\n"
 
         for log in page_logs:
@@ -111,7 +108,11 @@ class LogsView(discord.ui.View):
                 break
             text += f"{log}\n"
 
-        return f"```ansi\n{text}\n```"
+    # Ensure length < 2000
+    if len(text) > MAX_DISCORD_MSG:
+        text = text[:MAX_DISCORD_MSG - 5] + "...\n"
+
+    return f"```ansi\n{text}\n```"
 
     async def interaction_check(self, interaction: discord.Interaction):
         return interaction.user.id == self.user.id
