@@ -4,19 +4,26 @@ import discord
 from discord.ext import commands
 import json
 import math
+import time
+import os
 from discord import app_commands
 from commands.staff.utils import is_staff
 
-LOG_FILE = "logs.json"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+LOG_FILE = os.path.join(BASE_DIR, "logs.json")
 LOGS_PER_PAGE = 10
 
 
 def load_logs():
-    try:
-        with open(LOG_FILE) as f:
-            return json.load(f)
-    except:
-        return []
+
+    for _ in range(3):
+        try:
+            with open(LOG_FILE, "r") as f:
+                return json.load(f)
+        except:
+            time.sleep(0.1)
+
+    return []
 
 
 class LogsView(discord.ui.View):
