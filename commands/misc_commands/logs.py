@@ -204,7 +204,7 @@ class Logs(commands.Cog):
     @is_staff()
     async def logs(self, interaction: discord.Interaction):
 
-        logs = load_logs()[-200:]
+        logs = load_logs()[-200:][::-1]
 
         if not logs:
             await interaction.response.send_message(
