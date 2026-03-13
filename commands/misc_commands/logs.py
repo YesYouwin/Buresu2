@@ -10,7 +10,7 @@ from discord import app_commands
 from commands.staff.utils import is_staff
 
 LOG_FILE = "/home/wisp/logs.json"
-LOGS_PER_PAGE = 25
+LOGS_PER_PAGE = 20
 
 
 def load_logs(errors_only=False):
@@ -95,24 +95,23 @@ class LogsView(discord.ui.View):
     def format_page(self):
         MAX_DISCORD_MSG = 2000
         total_pages = max(1, math.ceil(len(self.logs) / LOGS_PER_PAGE))
+
         start = self.page * LOGS_PER_PAGE
         end = start + LOGS_PER_PAGE
         page_logs = self.logs[start:end]
 
         title = "⚠️ Errors & Warnings" if self.errors_only else "📜 Bot Logs"
-        text = f"{title} (Page {self.page+1}/{total_pages})\n\n"
+        text = f"{title} (Page {self.page + 1}/{total_pages})\n\n"
 
         for log in page_logs:
+            # Prevent exceeding Discord message limit
             if len(text) + len(log) + 10 > MAX_DISCORD_MSG:
                 text += "...(truncated)\n"
                 break
+
             text += f"{log}\n"
 
-    # Ensure length < 2000
-    if len(text) > MAX_DISCORD_MSG:
-        text = text[:MAX_DISCORD_MSG - 5] + "...\n"
-
-    return f"```ansi\n{text}\n```"
+        return f"```ansi\n{text}\n```"
 
     async def interaction_check(self, interaction: discord.Interaction):
         return interaction.user.id == self.user.id
