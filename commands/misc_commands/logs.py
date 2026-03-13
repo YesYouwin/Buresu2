@@ -1,4 +1,3 @@
-python
 print("Loading Logs Module")
 
 import discord
