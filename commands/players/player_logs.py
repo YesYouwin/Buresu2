@@ -1,6 +1,10 @@
+print("Loading Playerlogs module...")
+print("Loading Playerhistory module...")
+
 import discord
 from discord import app_commands
 from discord.ext import commands
+from utils import is_staff
 from datetime import datetime
 import asyncio
 import traceback
@@ -15,6 +19,7 @@ class PlayerLogs(commands.Cog):
 
 
     @app_commands.command(name="playerlogs", description="Create a formatted player log")
+    @app_commands.check(is_staff())
     @app_commands.choices(
         action=[
             app_commands.Choice(name="Recruitment", value="Recruitment"),

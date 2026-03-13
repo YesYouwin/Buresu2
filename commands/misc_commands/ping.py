@@ -1,5 +1,4 @@
-
-print("Loading Ping command")
+print("Loading Ping Module")
 
 import discord
 from discord import app_commands

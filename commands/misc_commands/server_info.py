@@ -1,4 +1,4 @@
-print("Loading ServerInfo command")
+print("Loading ServerInfo module")
 
 import discord
 from discord import app_commands

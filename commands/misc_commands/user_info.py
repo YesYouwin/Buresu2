@@ -1,4 +1,4 @@
-print("Loading UserInfo command")
+print("Loading UserInfo module")
 
 import discord
 from discord import app_commands

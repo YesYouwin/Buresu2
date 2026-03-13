@@ -87,6 +87,7 @@ class MyBot(commands.Bot):
             "commands.misc_commands.ping",
             "commands.misc_commands.server_info",
             "commands.misc_commands.user_info",
+            "command.misc_command.logs",
             "commands.players.player_logs",
             "commands.scrims.scrim_schedule",
         ]
@@ -237,6 +238,31 @@ async def on_command_error(ctx, error):
 
 @bot.tree.error
 async def on_app_command_error(interaction, error):
+
+    if isinstance(error, app_commands.CheckFailure):
+        try:
+            await interaction.response.send_message(
+                "❌ You do not have permission to use this command.",
+                ephemeral=True
+            )
+        except:
+            pass
+        return
+
+    traceback_str = "".join(
+        traceback.format_exception(type(error), error, error.__traceback__)
+    )
+
+    logging.error(
+        f"Slash command error | user={interaction.user} | command={interaction.command}\n{traceback_str}"
+    )
+
+    try:
+        await interaction.response.send_message(
+            "❌ Command error occurred.", ephemeral=True
+        )
+    except:
+        pass
 
     traceback_str = "".join(
         traceback.format_exception(type(error), error, error.__traceback__)
