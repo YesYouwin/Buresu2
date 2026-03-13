@@ -4,7 +4,7 @@ print("Loading Playerhistory module...")
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils import is_staff
+from commands.staff.utils import is_staff
 from datetime import datetime
 import asyncio
 import traceback

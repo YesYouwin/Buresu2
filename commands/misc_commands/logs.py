@@ -6,7 +6,7 @@ from discord.ext import commands
 import json
 import math
 
-from utils import is_staff
+from commands.staff.utils import is_staff
 
 LOG_FILE = "logs.json"
 LOGS_PER_PAGE = 10

@@ -87,7 +87,7 @@ class MyBot(commands.Bot):
             "commands.misc_commands.ping",
             "commands.misc_commands.server_info",
             "commands.misc_commands.user_info",
-            "command.misc_command.logs",
+            "commands.misc_commands.logs"
             "commands.players.player_logs",
             "commands.scrims.scrim_schedule",
         ]
