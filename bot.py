@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from discord import app_commands
 import os
 from flask import Flask
+import time
 from threading import Thread
 from dotenv import load_dotenv
 from database.db import init_db
@@ -18,7 +19,7 @@ TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 
 # ---------------------------------------------
-# KEEP ALIVE SERVER
+# KEEP ALIVE SERVERecho $TOKEN
 # ---------------------------------------------
 
 app = Flask(__name__)
@@ -123,9 +124,13 @@ async def update_status():
 
     cpu = psutil.cpu_percent()
     ram = psutil.virtual_memory().used / 1024 / 1024
-    ping = round(bot.latency * 1000)
+    uptime_seconds = int(time.time() - start_time)
+    hours, remainder = divmod(uptime_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    uptime_str = f"{hours}h {minutes}m"
 
-    status = f"CPU {cpu}% | RAM {ram:.0f}MB | {ping}ms"
+
+    status = f"CPU {cpu}% | {ram:.0f}MB | Uptime {uptime_str}"
 
     await bot.change_presence(
         activity=discord.Activity(
