@@ -93,7 +93,7 @@ class LogsView(discord.ui.View):
         self.errors_only = errors_only
 
     def format_page(self):
-
+        MAX_DISCORD_MSG = 2000
         total_pages = max(1, math.ceil(len(self.logs) / LOGS_PER_PAGE))
 
         start = self.page * LOGS_PER_PAGE
@@ -106,6 +106,9 @@ class LogsView(discord.ui.View):
         text = f"{title} (Page {self.page+1}/{total_pages})\n\n"
 
         for log in page_logs:
+            if len(text) + len(log) + 5 > MAX_DISCORD_MSG:  # 5 for the wrapping ```ansi
+                text += "...(truncated)\n"
+                break
             text += f"{log}\n"
 
         return f"```ansi\n{text}\n```"
