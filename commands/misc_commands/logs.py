@@ -1,11 +1,10 @@
 print("Loading Logs Module")
 
 import discord
-from discord import app_commands
 from discord.ext import commands
 import json
 import math
-
+from discord import app_commands
 from commands.staff.utils import is_staff
 
 LOG_FILE = "logs.json"
@@ -30,13 +29,14 @@ class LogsView(discord.ui.View):
 
     def format_page(self):
 
+        total_pages = max(1, math.ceil(len(self.logs) / LOGS_PER_PAGE))
+
         start = self.page * LOGS_PER_PAGE
         end = start + LOGS_PER_PAGE
 
         page_logs = self.logs[start:end]
-        total_pages = math.ceil(len(self.logs) / LOGS_PER_PAGE)
 
-        text = f"📜 **Bot Logs (Page {self.page+1}/{total_pages})**\n\n"
+        text = f"📜 Bot Logs (Page {self.page+1}/{total_pages})\n\n"
 
         for log in page_logs:
             text += f"{log}\n"
@@ -44,7 +44,6 @@ class LogsView(discord.ui.View):
         return f"```ansi\n{text}\n```"
 
     async def interaction_check(self, interaction: discord.Interaction):
-
         # Only the command user can use buttons
         return interaction.user.id == self.user.id
 
@@ -77,7 +76,7 @@ class Logs(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="logs", description="View bot logs")
-    @app_commands.check(is_staff())
+    @is_staff()
     async def logs(self, interaction: discord.Interaction):
 
         logs = load_logs()
