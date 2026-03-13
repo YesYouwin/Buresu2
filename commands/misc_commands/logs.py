@@ -9,8 +9,7 @@ import os
 from discord import app_commands
 from commands.staff.utils import is_staff
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-LOG_FILE = os.path.join(BASE_DIR, "logs.json")
+LOG_FILE = "/home/wisp/logs.json"
 LOGS_PER_PAGE = 10
 
 
