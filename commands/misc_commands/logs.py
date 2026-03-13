@@ -10,7 +10,7 @@ from discord import app_commands
 from commands.staff.utils import is_staff
 
 LOG_FILE = "/home/wisp/logs.json"
-LOGS_PER_PAGE = 10
+LOGS_PER_PAGE = 25
 
 
 def load_logs(errors_only=False):
@@ -201,7 +201,7 @@ class Logs(commands.Cog):
     @is_staff()
     async def logs(self, interaction: discord.Interaction):
 
-        logs = load_logs()[::-1][:200]
+        logs = load_logs()[-200:]
 
         if not logs:
             await interaction.response.send_message(
